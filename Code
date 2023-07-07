@@ -1,0 +1,134 @@
+#importing mysql connector
+import mysql.connector
+
+#building connection
+con = mysql.connector.connect(
+    host="localhost", user="root", password="password", datasbase="socult"
+)
+
+#Add Participant
+def Add_part():
+
+    RollNo= input("Enter Participant Roll No.: ")
+
+    #Check if participant already exists or not
+    if(check_part(RollNo)==True):
+        print("Participant exists already")
+        menu()
+    else:
+        Name=input("Enter participant name: ")
+        Email=input("Enter participant email ID: ")
+        Phone=input("Enter participant Phone No.: ")
+        Role=input("Enter the role/position of the participant: ")
+        Details=(RollNo, Name, Email, Phone, Role)
+
+        sql='insert into socult values(%s, %s, %s, %s, %s)'
+        c=con.cursor()
+
+        c.execute(sql, Details)
+        con.commit()
+        print("Participant Added Successfully")
+        menu()
+
+
+#Promote Participant badge
+def Promote_part():
+    RollNo=int(input("Enter Participant RollNo.: "))
+
+    if(check_part(RollNo)==False):
+        print("Participant not found")
+        menu()
+    else:
+        sql='select salary from socult where id=%s'
+        dt=(RollNo, )
+        c=con.cursor()
+        c.execute(sql, dt)
+
+        promote=input("Enter the updated badge of the participant: ")
+
+        sql='update socult set salary=%s where id=%s'
+        d=(promote, RollNo)
+
+        c.execute(sql, d)
+        con.commit()
+        print("Participant promoted successfully")
+        menu()
+
+#Remove Participant
+def Remove_part():
+    RollNo= input("Enter Participant Roll No.: ")
+
+    if(check_part(RollNo)==False):
+        print("Participant Not Found")
+        menu()
+    else:
+        sql='delete from socult where id=%s'
+        data=(RollNo, )
+        c=con.cursor()
+        c.execute(sql, data)
+        con.commit()
+        print("Participant Removed")
+        menu()
+
+#Check if participant exist or not
+def check_part(RollNo):
+
+    sql='select * from socult where id=%s'
+
+    c=con.cursor(buffered=True)
+    data=(RollNo,)
+
+    c.execute(sql, data)
+    r=c.rowcount
+    if r==1:
+        return True
+    else:
+        return False
+
+#Display all Participants
+def Display_part():
+
+    sql='select * from socult'
+    c=con.cursor()
+
+    c.execute(sql)
+
+    r=c.fetchall
+    for i in r:
+        print("Participant Roll No.: ", i[0])
+        print("Participant Name: ", i[1])
+        print("Participant Email ID: ", i[2])
+        print("Participant Phone No.: ", i[3])
+        print("--------------------\
+        ---------------------------\
+        ----------------------")
+
+    menu()
+
+#Display menu
+def menu():
+    print("GC Participant Management list")
+    print("PRESS")
+    print("1 to Add a Participant")
+    print("2 to Remove a Participant")
+    print("3 to Promote a Participant")
+    print("4 to Display all Participants")
+    print("5 to Exit")
+
+    ch=int(input("Enter your choice"))
+    if ch==1:
+        Add_part()
+    elif ch==2:
+        Remove_part()
+    elif ch==3:
+        Promote_part()
+    elif ch==4:
+        Display_part()
+    elif ch==5:
+        exit(0)
+    else:
+        print("Invalid Choice")
+        menu()
+
+#Calling Menu
+menu()
